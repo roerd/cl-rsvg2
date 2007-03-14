@@ -1,0 +1,21 @@
+cl-rsvg is a Common Lisp binding to librsvg to allow rendering SVGs to
+Cairo surfaces.
+
+It requires cffi, asdf, cl-cairo, and naturally, librsvg.
+
+So far it has been tested against librsvg 2.16.0 with SBCL 0.9.14 under
+Debian GNU/Linux.
+
+The mapping is somewhat minimal at the moment, consisting only of what
+is required to load SVG files and render them to Cairo.  Bother the
+author if you need more :)
+
+tests/cairo-test.lisp contains example usage.
+
+See also:
+http://librsvg.sourceforge.net
+http://www.cairographics.org
+http://www.cliki.net/cl-cairo
+
+Enjoy!
+Sasha Kovar <sasha-rsvg@arcocene.org>
