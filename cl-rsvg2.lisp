@@ -15,6 +15,8 @@
 
 (use-foreign-library librsvg-2)
 
+;;; RsvgHandle
+
 ;; should the impossible happen...
 ;; (defcenum rsvg-error
 ;;   :RSVG_ERROR_FAILED)
@@ -35,41 +37,71 @@
   (em :double)
   (ex :double))
 
-;; From the manual: rsvg_init has been deprecated since version 2.36
-;; and should not be used in newly-written code. Use g_type_init()
-;; (defcfun ("rsvg_init" init) :void)
+(defcstruct position-data
+  (x :int)
+  (y :int))
 
-;; From the manual: rsvg_handle_free is deprecated and should not be
-;; used in newly-written code. Use g_object_unref() instead.
-;; (defcfun ("rsvg_term" term) :void)
+(defcfun ("rsvg_set_default_dpi" set-default-dpi) :void
+  (dpi :double))
 
-;; (defcfun ("rsvg_set_default_dpi" set-default-dpi) :void
-;;   (dpi :double))
+(defcfun ("rsvg_set_default_dpi_x_y" set-default-dpi-x-y) :void
+  (dpi-x :double)
+  (dpi-y :double))
 
-;; (defcfun ("rsvg_set_default_dpi_x_y" set-default-dpi-x-y) :void
-;;   (dpi-x :double)
-;;   (dpi-y :double))
+(defcfun ("rsvg_handle_set_dpi" handle-set-dpi) :void
+  (handle :pointer)
+  (dpi :double))
 
-;; (defcfun ("rsvg_handle_set_dpi" handle-set-dpi) :void
-;;   (handle :pointer)
-;;   (dpi :double))
+(defcfun ("rsvg_handle_set_dpi_x_y" handle-set-dpi-x-y) :void
+  (handle :pointer)
+  (dpi-x :double)
+  (dpi-y :double))
 
-;; (defcfun ("rsvg_handle_set_dpi_x_y" handle-set-dpi-x-y) :void
-;;   (handle :pointer)
-;;   (dpi-x :double)
-;;   (dpi-y :double))
+(defcfun ("rsvg_handle_new" handle-new) :pointer)
+
+(defcfun ("rsvg_handle_close" handle-close) :boolean
+  (handle :pointer)
+  (error :pointer))
+
+(defcfun ("rsvg_handle_get_base_uri" handle-get-base-uri) :string
+  (handle :pointer))
+
+(defcfun ("rsvg_handle_set_base_uri" handle-set-base-uri) :void
+  (handle :pointer)
+  (base-uri :string))
 
 (defcfun ("rsvg_handle_get_dimensions" handle-get-dimensions) :void
   (handle :pointer)
   (dimension-data :pointer))
 
+(defcfun ("rsvg_handle_get_dimensions_sub" handle-get-dimensions-sub) :void
+  (handle :pointer)
+  (dimension-data :pointer)
+  (id :string))
+
+(defcfun ("rsvg_handle_get_position_sub" handle-get-position-sub) :void
+  (handle :pointer)
+  (position-data :pointer)
+  (id :string))
+
+(defcfun ("rsvg_handle_has_sub" handle-has-sub) :boolean
+  (handle :pointer)
+  (id :string))
+
+(defcfun ("rsvg_handle_get_title" handle-get-title) :string
+  (handle :pointer))
+
+(defcfun ("rsvg_handle_get_desc" handle-get-desc) :string
+  (handle :pointer))
+
+(defcfun ("rsvg_handle_get_metadata" handle-get-metadata) :string
+  (handle :pointer))
+
 (defcfun ("rsvg_handle_new_from_file" handle-new-from-file) :pointer
   (file_name :string)
   (error :pointer))
 
-(defcfun ("rsvg_handle_close" handle-close) :boolean
-  (handle :pointer)
-  (error :pointer))
+;;; Using RSVG with cairo
 
 (defcfun ("rsvg_handle_render_cairo" handle-render-cairo) :void
   (handle :pointer)
@@ -88,8 +120,10 @@
      (setf ,var ,handle)
      (unless  (null-pointer-p ,var)
        (unwind-protect
-            (progn ,@body)
-         (handle-close ,var (null-pointer))
+            (progn
+              (with-g-error (err)
+                (handle-close ,var err))
+              ,@body)
          (g-object-unref ,var)))))
 
 (defun make-handle-from-file (filename)
