@@ -85,20 +85,23 @@
 (defmacro with-handle ((var handle) &body body)
   `(with-foreign-object (,var 'handle)
      (%g-type-init)
-     (handler-case
-         (with-g-error (err)
-           (setf ,var ,handle))
-       (g-error-condition (e) (warn e)))
+     (setf ,var ,handle)
      (unless  (null-pointer-p ,var)
        (unwind-protect
             (progn ,@body)
          (handle-close ,var (null-pointer))
          (g-object-unref ,var)))))
 
+(defun make-handle-from-file (filename)
+  (handler-case
+      (with-g-error (err)
+        (handle-new-from-file filename err))
+    (g-error-condition (e) (warn e))))
+
 (defun draw-svg-file (filename &optional (context *context*))
   "Draw a SVG file on a Cairo surface."
   (with-foreign-object (dims 'dimension-data)
-    (with-handle (svg (handle-new-from-file filename err))
+    (with-handle (svg (make-handle-from-file filename))
       (handle-get-dimensions svg dims)
       (with-foreign-slots ((width height) dims dimension-data)
         (format t "~A size: ~Ax~A~%" filename width height)
