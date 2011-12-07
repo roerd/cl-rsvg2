@@ -1,6 +1,6 @@
-cl-rsvg - Common Lisp bindings to librsvg.
+cl-rsvg2 - Common Lisp bindings to librsvg.
 
-cl-rsvg is licensed under the terms of the Lisp Lesser GNU
+cl-rsvg2 is licensed under the terms of the Lisp Lesser GNU
 Public License (http://opensource.franz.com/preamble.html), known as
 the LLGPL.  The LLGPL consists of a preamble (see above URL) and the
 LGPL.  Where these conflict, the preamble takes precedence. 
