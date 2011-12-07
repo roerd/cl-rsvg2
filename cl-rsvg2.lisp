@@ -35,9 +35,13 @@
   (em :double)
   (ex :double))
 
-(defcfun ("rsvg_init" init) :void)
+;; From the manual: rsvg_init has been deprecated since version 2.36
+;; and should not be used in newly-written code. Use g_type_init()
+;; (defcfun ("rsvg_init" init) :void)
 
-(defcfun ("rsvg_term" term) :void)
+;; From the manual: rsvg_handle_free is deprecated and should not be
+;; used in newly-written code. Use g_object_unref() instead.
+;; (defcfun ("rsvg_term" term) :void)
 
 ;; (defcfun ("rsvg_set_default_dpi" set-default-dpi) :void
 ;;   (dpi :double))
@@ -76,30 +80,26 @@
   (cr :pointer)
   (id :string))
 
-
-;; TODO g_object_unref() for closing a handle
-
 ;;; the interface: moved here from cairo-test.lisp
 
-(defun display-gerror (e)
-  (let ((code (g-error-condition-code e))
-        (message (g-error-condition-message e)))
-    (cerror "Ignore this svg."
-            "Couldn't load svg: (~A) ~A." code message)))
+(defmacro with-handle ((var handle) &body body)
+  `(with-foreign-object (,var 'handle)
+     (%g-type-init)
+     (handler-case
+         (with-g-error (err)
+           (setf ,var ,handle))
+       (g-error-condition (e) (warn e)))
+     (unless  (null-pointer-p ,var)
+       (unwind-protect
+            (progn ,@body)
+         (handle-close ,var (null-pointer))
+         (g-object-unref ,var)))))
 
 (defun draw-svg-file (filename &optional (context *context*))
   "Draw a SVG file on a Cairo surface."
-  (with-foreign-objects ((svg 'handle)
-                         (dims 'dimension-data))
-    (init)
-    (handler-case
-        (with-g-error (err)
-          (setf svg (handle-new-from-file filename err))
-          (unless  (null-pointer-p svg)
-            (handle-get-dimensions svg dims)
-            (with-foreign-slots ((width height) dims dimension-data)
-              (format t "~A size: ~Ax~A~%" filename width height)
-              (handle-render-cairo svg (get-pointer context))
-              (term))))
-      (g-error-condition (e)
-        (display-gerror e)))))
+  (with-foreign-object (dims 'dimension-data)
+    (with-handle (svg (handle-new-from-file filename err))
+      (handle-get-dimensions svg dims)
+      (with-foreign-slots ((width height) dims dimension-data)
+        (format t "~A size: ~Ax~A~%" filename width height)
+        (handle-render-cairo svg (get-pointer context))))))
