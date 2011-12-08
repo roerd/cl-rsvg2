@@ -11,4 +11,4 @@
   (:nicknames #:rsvg2)
   (:use #:cl #:cffi #:gobject.ffi #:glib)
   (:import-from #:cl-cairo2 #:*context* #:get-pointer)
-  (:export #:draw-svg-file))
+  (:export #:draw-svg-data #:draw-svg-file))

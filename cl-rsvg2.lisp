@@ -122,6 +122,18 @@
     (with-foreign-slots ((width height em ex) dims dimension-data)
       (values width height em ex))))
 
+(defun handle-get-sub-dimension-values (handle id)
+  (with-foreign-object (dims 'dimension-data)
+    (handle-get-dimensions-sub handle dims id)
+    (with-foreign-slots ((width height em ex) dims dimension-data)
+      (values width height em ex))))
+
+(defun handle-get-sub-position-values (handle id)
+  (with-foreign-object (pos 'position-data)
+    (handle-get-position-sub handle pos)
+    (with-foreign-slots ((x y) pos position-data)
+      (values x y))))
+
 (defmacro with-handle ((var handle) &body body)
   `(with-foreign-object (,var 'handle)
      (%g-type-init)
@@ -131,6 +143,14 @@
             (progn ,@body)
          (g-object-unref ,var)))))
 
+(defmacro with-handle-from-data ((handle data data-len) &body body)
+  (let ((err (gensym)))
+    `(with-handle (,handle (with-g-error (,err)
+                             (handle-new-from-data ,data ,data-len ,err)))
+       (with-g-error (,err)
+         (handle-close ,handle ,err))
+       ,@body)))
+
 (defmacro with-handle-from-file ((handle filename) &body body)
   (let ((err (gensym)))
     `(with-handle (,handle (with-g-error (,err)
@@ -138,6 +158,15 @@
        (with-g-error (,err)
          (handle-close ,handle ,err))
        ,@body)))
+
+(defun draw-svg-data (data data-len &optional (context *context*))
+  "Draw SVG data on a Cairo surface. DATA needs to be an uint8 C array,
+   and DATA-LEN its length, in bytes. Return the SVGs width and height."
+  (with-handle-from-data (svg data data-len)
+    (multiple-value-bind (width height)
+        (handle-get-dimension-values svg)
+      (handle-render-cairo svg (get-pointer context))
+      (values width height))))
 
 (defun draw-svg-file (filename &optional (context *context*))
   "Draw a SVG file on a Cairo surface. Return its width and height."
