@@ -114,28 +114,24 @@
 
 ;;; the interface: moved here from cairo-test.lisp
 
-(defmacro with-handle ((var handle) &body body)
-  `(with-foreign-object (,var 'handle)
-     (%g-type-init)
-     (setf ,var ,handle)
-     (unless  (null-pointer-p ,var)
-       (unwind-protect
-            (progn
-              (with-g-error (err)
-                (handle-close ,var err))
-              ,@body)
-         (g-object-unref ,var)))))
-
-(defun make-handle-from-file (filename)
-  (handler-case
-      (with-g-error (err)
-        (handle-new-from-file filename err))
-    (g-error-condition (e) (warn e))))
+(defmacro with-handle-from-file ((var filename) &body body)
+  (let ((err (gensym)))
+   `(with-foreign-object (,var 'handle)
+      (%g-type-init)
+      (setf ,var (with-g-error (,err)
+                   (handle-new-from-file ,filename ,err)))
+      (unless  (null-pointer-p ,var)
+        (unwind-protect
+             (progn
+               (with-g-error (,err)
+                 (handle-close ,var ,err))
+               ,@body)
+          (g-object-unref ,var))))))
 
 (defun draw-svg-file (filename &optional (context *context*))
   "Draw a SVG file on a Cairo surface."
   (with-foreign-object (dims 'dimension-data)
-    (with-handle (svg (make-handle-from-file filename))
+    (with-handle-from-file (svg filename)
       (handle-get-dimensions svg dims)
       (with-foreign-slots ((width height) dims dimension-data)
         (format t "~A size: ~Ax~A~%" filename width height)
