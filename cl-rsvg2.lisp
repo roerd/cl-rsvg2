@@ -113,7 +113,14 @@
   (cr :pointer)
   (id :string))
 
-;;; the interface: moved here from cairo-test.lisp
+;;; the interface: high-level functions and macros building upon the
+;;; C functions.
+
+(defun handle-get-dimension-values (handle)
+  (with-foreign-object (dims 'dimension-data)
+    (handle-get-dimensions handle dims)
+    (with-foreign-slots ((width height em ex) dims dimension-data)
+      (values width height em ex))))
 
 (defmacro with-handle ((var handle) &body body)
   `(with-foreign-object (,var 'handle)
@@ -134,9 +141,8 @@
 
 (defun draw-svg-file (filename &optional (context *context*))
   "Draw a SVG file on a Cairo surface. Return its width and height."
-  (with-foreign-object (dims 'dimension-data)
-    (with-handle-from-file (svg filename)
-      (handle-get-dimensions svg dims)
-      (with-foreign-slots ((width height) dims dimension-data)
-        (handle-render-cairo svg (get-pointer context))
-        (values width height)))))
+  (with-handle-from-file (svg filename)
+    (multiple-value-bind (width height)
+        (handle-get-dimension-values svg)
+      (handle-render-cairo svg (get-pointer context))
+      (values width height))))
