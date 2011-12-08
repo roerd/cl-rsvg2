@@ -17,19 +17,7 @@
 
 ;;; RsvgHandle
 
-;; should the impossible happen...
-;; (defcenum rsvg-error
-;;   :RSVG_ERROR_FAILED)
-
-;; (defcstruct RsvgHandleClass
-;;      (parent :pointer)
-;;      (_abi_padding :pointer))
-
-;; could maybe just use typedef :pointer
-(defcstruct handle
-  (parent %g-object)
-  (priv :pointer)
-  (_abi_padding :pointer))
+(defctype handle :pointer)
 
 (defcstruct dimension-data
   (width :int)
