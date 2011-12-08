@@ -129,10 +129,10 @@
           (g-object-unref ,var))))))
 
 (defun draw-svg-file (filename &optional (context *context*))
-  "Draw a SVG file on a Cairo surface."
+  "Draw a SVG file on a Cairo surface. Return its width and height."
   (with-foreign-object (dims 'dimension-data)
     (with-handle-from-file (svg filename)
       (handle-get-dimensions svg dims)
       (with-foreign-slots ((width height) dims dimension-data)
-        (format t "~A size: ~Ax~A~%" filename width height)
-        (handle-render-cairo svg (get-pointer context))))))
+        (handle-render-cairo svg (get-pointer context))
+        (values width height)))))

@@ -23,7 +23,9 @@
 (defun draw-with-at (filename scale x y)
   (translate x y)
   (scale scale scale)
-  (draw-svg-file (make-test-filepath filename))
+  (multiple-value-bind (width height)
+      (draw-svg-file (make-test-filepath filename))
+    (format t "~A size: ~Ax~A~%" filename width height))
   (scale (/ 1 scale) (/ 1 scale))
   (translate (- 0 x) (- 0 y)))
 
