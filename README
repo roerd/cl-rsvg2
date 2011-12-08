@@ -17,10 +17,11 @@ for most (non-deprecated) functions of the RSVG Library, but not
 tested them.  The GdkPixmap functions are in a seperate sytem which
 depends upon cl-ftk2-gdk.  The tested functionaly consists only of what
 is required to load SVG files and render them to Cairo.  The only
-exported function is DRAW-SVG-FILE which is high-level wrapper for
-doing just that.  Originally it was not part of the library, but of
-the test.  If you need more high-level functionality or have used
-some of the untested functionality and noticed problems, contact me!
+exported functions are DRAW-SVG-FILE and DRAW-SVG-FILE, the later of
+which is high-level wrapper for doing just that.  Originally it was not
+part of the library, but of the test.  If you need more high-level
+functionality or have used some of the untested functionality and
+noticed problems, contact me!
 
 tests/cairo-test.lisp contains example usage.
 
