@@ -11,7 +11,7 @@
 
 (asdf:defsystem cl-rsvg2-pixbuf
   :description "Using the RSVG Library with GdkPixbuf."
-  :version "0.4"
+  :version "0.4.1"
   :author "Rörd Hinrichsen <roerdhh@gmail.com>"
   :licence "LLGPL"
   :serial t

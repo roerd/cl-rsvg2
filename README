@@ -13,11 +13,11 @@ the library but like to avoid this dependency, contact me so I can make
 a light version without it.
 
 The mapping was somewhat minimal in cl-rsvg.  I added FFI declarations
-for most (non-deprecated) functions of the RSVG Library, but not
-tested them.  The GdkPixmap functions are in a seperate sytem which
-depends upon cl-ftk2-gdk.  The tested functionaly consists only of what
-is required to load SVG files and render them to Cairo.  The highest
-level wrappers are DRAW-SVG-DATA and DRAW-SVG-FILE, the later of
+for most (non-deprecated) functions of the RSVG Library, but tested only
+some of them.  The GdkPixmap functions are in a seperate sytem which
+depends upon cl-ftk2-gdk.  The well supported functionaly consists only
+of what is required to load SVG files and render them to Cairo.  The
+highest level wrappers are DRAW-SVG-DATA and DRAW-SVG-FILE, the later of
 which is doing just that.  If you have used some of the untested
 functionality and noticed problems, or wish for more functionality,
 contact me!

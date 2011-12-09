@@ -12,7 +12,7 @@
 
 (asdf:defsystem cl-rsvg2-test
   :description "Eos tests for cl-rsvg2."
-  :version "0.4"
+  :version "0.4.1"
   :author "Rörd Hinrichsen <roerdhh@gmail.com>"
   :licence "LLGPL"
   :serial t

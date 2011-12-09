@@ -12,7 +12,7 @@
 
 (asdf:defsystem cl-rsvg2
   :description "Bindings for RSVG Library."
-  :version "0.4"
+  :version "0.4.1"
   :author "Sasha Kovar <sasha-rsvg@arcocene.org>"
   :maintainer "Rörd Hinrichsen <roerdhh@gmail.com>"
   :licence "LLGPL"
