@@ -116,6 +116,19 @@
 ;;; the interface: high-level functions and macros building upon the
 ;;; C functions.
 
+(defmacro with-handle ((var handle) &body body)
+  `(with-foreign-object (,var 'handle)
+     (%g-type-init)
+     (setf ,var ,handle)
+     (unless  (null-pointer-p ,var)
+       (unwind-protect
+            (progn ,@body)
+         (g-object-unref ,var)))))
+
+(defun handle-write-data (handle buf count)
+  (with-g-error (err)
+   (handle-write handle buf count err)))
+
 (defun handle-get-dimension-values (handle)
   (with-foreign-object (dims 'dimension-data)
     (handle-get-dimensions handle dims)
@@ -134,15 +147,6 @@
     (with-foreign-slots ((x y) pos position-data)
       (values x y))))
 
-(defmacro with-handle ((var handle) &body body)
-  `(with-foreign-object (,var 'handle)
-     (%g-type-init)
-     (setf ,var ,handle)
-     (unless  (null-pointer-p ,var)
-       (unwind-protect
-            (progn ,@body)
-         (g-object-unref ,var)))))
-
 (defmacro with-handle-from-data ((handle data data-len) &body body)
   (let ((err (gensym)))
     `(with-handle (,handle (with-g-error (,err)
@@ -159,19 +163,25 @@
          (handle-close ,handle ,err))
        ,@body)))
 
+(defun draw-svg (svg &optional (context *context*))
+  (multiple-value-bind (width height)
+      (handle-get-dimension-values svg)
+    (handle-render-cairo svg (get-pointer context))
+    (values width height)))
+
+(defun draw-svg-sub (svg id &optional (context *context*))
+  (multiple-value-bind (width height)
+      (handle-get-dimension-values svg)
+    (handle-render-cairo-sub svg (get-pointer context) id)
+    (values width height)))
+
 (defun draw-svg-data (data data-len &optional (context *context*))
   "Draw SVG data on a Cairo surface. DATA needs to be an uint8 C array,
    and DATA-LEN its length, in bytes. Return the SVGs width and height."
   (with-handle-from-data (svg data data-len)
-    (multiple-value-bind (width height)
-        (handle-get-dimension-values svg)
-      (handle-render-cairo svg (get-pointer context))
-      (values width height))))
+    (draw-svg svg context)))
 
 (defun draw-svg-file (filename &optional (context *context*))
   "Draw a SVG file on a Cairo surface. Return its width and height."
   (with-handle-from-file (svg filename)
-    (multiple-value-bind (width height)
-        (handle-get-dimension-values svg)
-      (handle-render-cairo svg (get-pointer context))
-      (values width height))))
+    (draw-svg svg context)))
