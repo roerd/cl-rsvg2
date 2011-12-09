@@ -155,10 +155,11 @@
          (handle-close ,handle ,err))
        ,@body)))
 
-(defmacro with-handle-from-file ((handle filename) &body body)
+(defmacro with-handle-from-file ((handle filespec) &body body)
   (let ((err (gensym)))
     `(with-handle (,handle (with-g-error (,err)
-                             (handle-new-from-file ,filename ,err)))
+                             (handle-new-from-file (namestring ,filespec)
+                                                   ,err)))
        (with-g-error (,err)
          (handle-close ,handle ,err))
        ,@body)))
@@ -181,7 +182,7 @@
   (with-handle-from-data (svg data data-len)
     (draw-svg svg context)))
 
-(defun draw-svg-file (filename &optional (context *context*))
+(defun draw-svg-file (filespec &optional (context *context*))
   "Draw a SVG file on a Cairo surface. Return its width and height."
-  (with-handle-from-file (svg filename)
+  (with-handle-from-file (svg filespec)
     (draw-svg svg context)))

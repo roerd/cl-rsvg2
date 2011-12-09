@@ -10,9 +10,8 @@
 (in-suite cl-rsvg2)
 
 (defparameter *tux-file*
-  (namestring
-   (asdf:component-pathname
-    (asdf:find-component :cl-rsvg2-test "tests/tux.svg"))))
+  (asdf:component-pathname
+   (asdf:find-component :cl-rsvg2-test "tests/tux.svg")))
 
 (test handle-has-sub
   (is-true (with-handle-from-file (svg *tux-file*)
