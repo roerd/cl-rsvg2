@@ -16,19 +16,24 @@ The mapping was somewhat minimal in cl-rsvg.  I added FFI declarations
 for most (non-deprecated) functions of the RSVG Library, but not
 tested them.  The GdkPixmap functions are in a seperate sytem which
 depends upon cl-ftk2-gdk.  The tested functionaly consists only of what
-is required to load SVG files and render them to Cairo.  The only
-exported functions are DRAW-SVG-FILE and DRAW-SVG-FILE, the later of
-which is high-level wrapper for doing just that.  Originally it was not
-part of the library, but of the test.  If you need more high-level
-functionality or have used some of the untested functionality and
-noticed problems, contact me!
+is required to load SVG files and render them to Cairo.  The highest
+level wrappers are DRAW-SVG-DATA and DRAW-SVG-FILE, the later of
+which is doing just that.  If you have used some of the untested
+functionality and noticed problems, or wish for more functionality,
+contact me!
 
 tests/cairo-test.lisp contains example usage.
 
 See also:
+http://developer.gnome.org/rsvg/stable/index.html (Reference Manual)
 http://librsvg.sourceforge.net
 http://www.cairographics.org
 http://common-lisp.net/project/cl-cairo2/
+
+Current ideas for next improvements:
+* Add docstrings for all exported functions.
+* Use the functions that accept buffers instead of filenames to provide
+  support for input from CL streams.
 
 Enjoy!
 Rörd Hinrichsen <roerd@gmail.com>
