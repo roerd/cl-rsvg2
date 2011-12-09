@@ -143,7 +143,7 @@
 
 (defun handle-get-sub-position-values (handle id)
   (with-foreign-object (pos 'position-data)
-    (handle-get-position-sub handle pos)
+    (handle-get-position-sub handle pos id)
     (with-foreign-slots ((x y) pos position-data)
       (values x y))))
 
