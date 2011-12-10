@@ -59,7 +59,6 @@
   (let* ((out-file (make-test-filepath out-filebase))
 	 (width 750d0)
 	 (height 300d0))
-    
     (case type
       (:png
        (with-png-file (out-file :argb32 (round width) (round height))

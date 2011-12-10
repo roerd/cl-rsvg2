@@ -109,3 +109,10 @@
   (with-foreign-object (buf :uint8)
     (setf (mem-ref buf :uint8) integer)
     (handle-write-data (handle stream) buf 1)))
+
+(defmacro with-handle-data-stream ((stream) &body body)
+  (let ((handle (gensym)))
+    `(with-handle (,handle (handle-new))
+       (let ((,stream (make-instance 'handle-data-stream
+                                     :handle ,handle)))
+         ,@body))))

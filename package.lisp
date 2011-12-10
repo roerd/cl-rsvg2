@@ -22,5 +22,7 @@
            #:handle-get-sub-dimension-values
            #:handle-get-sub-position-values
            #:with-handle-from-data #:with-handle-from-file
+           #:draw-svg              #:draw-svg-sub
            #:draw-svg-data         #:draw-svg-file
-           #:handle-data-stream))
+           #:handle-data-stream    #:handle
+           #:with-handle-data-stream))
