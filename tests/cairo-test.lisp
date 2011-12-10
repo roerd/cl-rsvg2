@@ -8,12 +8,11 @@
 
 (in-package #:cl-rsvg-cairo-test)
 
-;; NOTE: change this to your source directory
 (defparameter *rsvg-directory*
-  "/home/roerd/quicklisp/local-projects/cl-rsvg2")
+  (namestring (asdf:system-source-directory :cl-rsvg2)))
 
 (defun make-test-filepath (filename)
-  (concatenate 'string *rsvg-directory* "/tests/" filename))
+  (concatenate 'string *rsvg-directory* "tests/" filename))
 
 (defun create-type-context (type out-file width height)
   (case type
