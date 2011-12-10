@@ -18,5 +18,6 @@
   :licence "LLGPL"
   :serial t
   :components ((:file "package")
+               (:file "cl-rsvg2-ffi")
 	       (:file "cl-rsvg2"))
-  :depends-on (#:cffi #:cl-cairo2 #:cl-gtk2-glib))
+  :depends-on (#:cffi #:cl-cairo2 #:cl-gtk2-glib #:trivial-gray-streams))

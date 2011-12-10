@@ -1,7 +1,8 @@
 cl-rsvg2 is a Common Lisp binding to RSVG Library to allow rendering
 SVGs to Cairo surfaces.
 
-It requires cffi, asdf, cl-cairo2, cl-gtk2, and naturally, librsvg.
+It requires cffi, asdf, cl-cairo2, cl-gtk2, trivial-gray-streams, and
+naturally, librsvg.
 
 So far it has been tested against librsvg 2.34.1 with SBCL 1.0.54 under
 Ubuntu GNU/Linux.
@@ -22,6 +23,11 @@ which is doing just that.  If you have used some of the untested
 functionality and noticed problems, or wish for more functionality,
 contact me!
 
+The newest functionality (in highly experimental state) is the
+HANDLE-DATA-STREAM class.  As of yet, it is completely untested.
+Its purpose is to make it possible to treat a RsvgHandle as a stream,
+i.e. feed it data with WRITE-SEQUENCE and WRITE-BYTE.
+
 tests/cairo-test.lisp contains example usage.
 
 See also:
@@ -30,10 +36,8 @@ http://librsvg.sourceforge.net
 http://www.cairographics.org
 http://common-lisp.net/project/cl-cairo2/
 
-Current ideas for next improvements:
+TODO:
 * Add docstrings for all exported functions.
-* Use the functions that accept buffers instead of filenames to provide
-  support for input from CL streams.
 
 Enjoy!
 Rörd Hinrichsen <roerd@gmail.com>

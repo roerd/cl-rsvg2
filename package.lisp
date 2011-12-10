@@ -9,11 +9,11 @@
 
 (defpackage #:cl-rsvg2
   (:nicknames #:rsvg2)
-  (:use #:cl #:cffi #:gobject.ffi #:glib)
+  (:use #:cl #:cffi #:gobject.ffi #:glib #:trivial-gray-streams)
   (:import-from #:cl-cairo2 #:*context* #:get-pointer)
   (:export #:set-default-dpi       #:set-default-dpi-x-y
            #:handle-set-dpi        #:handle-set-dpi-x-y
-           #:handle-new            #:handle-close
+           #:handle-new            #:handle-close*
            #:handle-get-base-uri   #:handle-set-base-uri
            #:handle-has-sub        #:handle-get-title
            #:handle-get-desc       #:handle-get-metadata
@@ -22,4 +22,5 @@
            #:handle-get-sub-dimension-values
            #:handle-get-sub-position-values
            #:with-handle-from-data #:with-handle-from-file
-           #:draw-svg-data         #:draw-svg-file))
+           #:draw-svg-data         #:draw-svg-file
+           #:handle-data-stream))

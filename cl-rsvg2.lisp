@@ -9,110 +9,6 @@
 
 (in-package :cl-rsvg2)
 
-(define-foreign-library librsvg-2
-  (:unix (:or "librsvg-2.so.2" "librsvg-2.so"))
-  (t (:default "librsvg-2")))
-
-(use-foreign-library librsvg-2)
-
-;;; RsvgHandle
-
-(defctype handle :pointer)
-
-(defctype gsize :uint)
-
-(defcstruct dimension-data
-  (width :int)
-  (height :int)
-  (em :double)
-  (ex :double))
-
-(defcstruct position-data
-  (x :int)
-  (y :int))
-
-(defcfun ("rsvg_set_default_dpi" set-default-dpi) :void
-  (dpi :double))
-
-(defcfun ("rsvg_set_default_dpi_x_y" set-default-dpi-x-y) :void
-  (dpi-x :double)
-  (dpi-y :double))
-
-(defcfun ("rsvg_handle_set_dpi" handle-set-dpi) :void
-  (handle handle)
-  (dpi :double))
-
-(defcfun ("rsvg_handle_set_dpi_x_y" handle-set-dpi-x-y) :void
-  (handle handle)
-  (dpi-x :double)
-  (dpi-y :double))
-
-(defcfun ("rsvg_handle_new" handle-new) handle)
-
-(defcfun ("rsvg_handle_write" handle-write) :boolean
-  (handle handle)
-  (buf (:pointer :uchar))
-  (count gsize)
-  (error (:pointer :pointer)))
-
-(defcfun ("rsvg_handle_close" handle-close) :boolean
-  (handle handle)
-  (error (:pointer :pointer)))
-
-(defcfun ("rsvg_handle_get_base_uri" handle-get-base-uri) :string
-  (handle handle))
-
-(defcfun ("rsvg_handle_set_base_uri" handle-set-base-uri) :void
-  (handle handle)
-  (base-uri :string))
-
-(defcfun ("rsvg_handle_get_dimensions" handle-get-dimensions) :void
-  (handle handle)
-  (dimension-data dimension-data))
-
-(defcfun ("rsvg_handle_get_dimensions_sub" handle-get-dimensions-sub) :void
-  (handle handle)
-  (dimension-data dimension-data)
-  (id :string))
-
-(defcfun ("rsvg_handle_get_position_sub" handle-get-position-sub) :void
-  (handle handle)
-  (position-data position-data)
-  (id :string))
-
-(defcfun ("rsvg_handle_has_sub" handle-has-sub) :boolean
-  (handle handle)
-  (id :string))
-
-(defcfun ("rsvg_handle_get_title" handle-get-title) :string
-  (handle handle))
-
-(defcfun ("rsvg_handle_get_desc" handle-get-desc) :string
-  (handle handle))
-
-(defcfun ("rsvg_handle_get_metadata" handle-get-metadata) :string
-  (handle handle))
-
-(defcfun ("rsvg_handle_new_from_data" handle-new-from-data) handle
-  (data (:pointer :uint8))
-  (data_len gsize)
-  (error (:pointer :pointer)))
-
-(defcfun ("rsvg_handle_new_from_file" handle-new-from-file) handle
-  (file_name :string)
-  (error (:pointer :pointer)))
-
-;;; Using RSVG with cairo
-
-(defcfun ("rsvg_handle_render_cairo" handle-render-cairo) :void
-  (handle handle)
-  (cr :pointer))
-
-(defcfun ("rsvg_handle_render_cairo_sub" handle-render-cairo-sub) :void
-  (handle handle)
-  (cr :pointer)
-  (id :string))
-
 ;;; the interface: high-level functions and macros building upon the
 ;;; C functions.
 
@@ -128,6 +24,10 @@
 (defun handle-write-data (handle buf count)
   (with-g-error (err)
    (handle-write handle buf count err)))
+
+(defun handle-close* (handle)
+  (with-g-error (err)
+    (handle-close handle err)))
 
 (defun handle-get-dimension-values (handle)
   (with-foreign-object (dims 'dimension-data)
@@ -151,8 +51,7 @@
   (let ((err (gensym)))
     `(with-handle (,handle (with-g-error (,err)
                              (handle-new-from-data ,data ,data-len ,err)))
-       (with-g-error (,err)
-         (handle-close ,handle ,err))
+       (handle-close* ,handle)
        ,@body)))
 
 (defmacro with-handle-from-file ((handle filespec) &body body)
@@ -160,8 +59,7 @@
     `(with-handle (,handle (with-g-error (,err)
                              (handle-new-from-file (namestring ,filespec)
                                                    ,err)))
-       (with-g-error (,err)
-         (handle-close ,handle ,err))
+       (handle-close* ,handle)
        ,@body)))
 
 (defun draw-svg (svg &optional (context *context*))
@@ -186,3 +84,28 @@
   "Draw a SVG file on a Cairo surface. Return its width and height."
   (with-handle-from-file (svg filespec)
     (draw-svg svg context)))
+
+;;; a gray-stream class for writing to a RsvgHandle
+
+(defclass handle-data-stream
+    (fundamental-binary-output-stream trivial-gray-stream-mixin)
+  ((handle :reader handle :initarg :handle)))
+
+(defmethod stream-element-type ((stream handle-data-stream))
+  '(unsigned-byte 8))
+
+(defmethod close ((stream handle-data-stream) &key abort)
+  (declare (ignore abort))
+  (handle-close* (handle stream)))
+
+(defmethod stream-write-sequence ((stream handle-data-stream)
+                                  sequence start end &key)
+  (cffi-sys:with-pointer-to-vector-data
+      (buf (coerce (subseq sequence start end)
+                   '(vector (unsigned-byte 8))))
+    (handle-write-data (handle stream) buf (- end start))))
+
+(defmethod stream-write-byte ((stream handle-data-stream) integer)
+  (with-foreign-object (buf :uint8)
+    (setf (mem-ref buf :uint8) integer)
+    (handle-write-data (handle stream) buf 1)))
