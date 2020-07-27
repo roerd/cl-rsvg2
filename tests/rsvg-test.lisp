@@ -1,6 +1,6 @@
 (defpackage #:cl-rsvg2-test
   (:nicknames #:rsvg2-test)
-  (:use #:cl #:cffi #:rsvg2 #:eos)
+  (:use #:cl #:cffi #:rsvg2 #:fiveam)
   (:export #:run!))
 
 (in-package #:cl-rsvg2-test)

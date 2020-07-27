@@ -18,4 +18,4 @@
   :serial t
   :components ((:static-file "tests/tux.svg")
                (:file "tests/rsvg-test"))
-  :depends-on (#:asdf #:cffi #:cl-rsvg2 #:eos))
+  :depends-on (#:asdf #:cffi #:cl-rsvg2 #:fiveam))
